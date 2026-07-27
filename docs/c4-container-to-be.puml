@@ -1,0 +1,67 @@
+@startuml
+!include <C4/C4_Container>
+
+LAYOUT_WITH_LEGEND()
+title CinemaAbyss — To-Be Container Diagram
+
+Person(viewer, "Зритель", "Ищет фильмы, управляет подпиской и смотрит контент")
+Person(admin, "Контент-менеджер", "Управляет каталогом фильмов")
+
+System_Ext(paymentProvider, "Платёжный провайдер", "Проводит платежи и возвраты")
+System_Ext(contentStorage, "Object Storage / CDN", "Хранит и доставляет видео и постеры")
+
+System_Boundary(cinemaabyss, "CinemaAbyss") {
+  Container(apiGateway, "API Gateway / Proxy", "Go, HTTP", "Единая точка входа, маршрутизация и постепенная миграция Strangler Fig")
+
+  Container(identityService, "Identity & Users Service", "Service", "Регистрация, профиль, аутентификация и права")
+  ContainerDb(identityDb, "Users DB", "PostgreSQL", "Пользователи и учётные данные")
+
+  Container(moviesService, "Movies Catalog Service", "Go", "Метаданные фильмов, жанры и рейтинги")
+  ContainerDb(moviesDb, "Movies DB", "PostgreSQL", "Каталог фильмов")
+
+  Container(subscriptionService, "Subscription Service", "Service", "Тарифы, подписки и доступ к контенту")
+  ContainerDb(subscriptionDb, "Subscriptions DB", "PostgreSQL", "Подписки и тарифы")
+
+  Container(paymentService, "Payment Service", "Service", "Платежи, статусы и возвраты")
+  ContainerDb(paymentDb, "Payments DB", "PostgreSQL", "Платёжные операции")
+
+  Container(playbackService, "Playback Service", "Service", "Проверка доступа и выдача ссылок на просмотр")
+  ContainerDb(playbackDb, "Playback DB", "PostgreSQL", "История просмотров и прогресс")
+
+  Container(eventsService, "Events Service", "Go", "HTTP producer API и обработка доменных событий")
+  ContainerQueue(kafka, "Kafka", "Event Streaming", "movie-events, user-events, payment-events")
+
+  Container(legacyMonolith, "Legacy Monolith", "Go", "Временно обслуживает ещё не извлечённые домены")
+  ContainerDb(legacyDb, "Legacy DB", "PostgreSQL", "Данные монолита на период миграции")
+}
+
+Rel(viewer, apiGateway, "Использует", "HTTPS/JSON")
+Rel(admin, apiGateway, "Управляет каталогом", "HTTPS/JSON")
+
+Rel(apiGateway, moviesService, "Маршрутизирует movie API по feature flag", "HTTP/JSON")
+Rel(apiGateway, legacyMonolith, "Маршрутизирует ещё не мигрированные API", "HTTP/JSON")
+Rel(apiGateway, identityService, "Пользователи и авторизация", "HTTP/JSON")
+Rel(apiGateway, subscriptionService, "Подписки", "HTTP/JSON")
+Rel(apiGateway, paymentService, "Платежи", "HTTP/JSON")
+Rel(apiGateway, playbackService, "Просмотр", "HTTP/JSON")
+Rel(apiGateway, eventsService, "Принимает event API", "HTTP/JSON")
+
+Rel(identityService, identityDb, "Читает/пишет")
+Rel(moviesService, moviesDb, "Читает/пишет")
+Rel(subscriptionService, subscriptionDb, "Читает/пишет")
+Rel(paymentService, paymentDb, "Читает/пишет")
+Rel(playbackService, playbackDb, "Читает/пишет")
+Rel(legacyMonolith, legacyDb, "Читает/пишет")
+
+Rel(paymentService, paymentProvider, "Создаёт платежи и получает статусы", "HTTPS")
+Rel(playbackService, contentStorage, "Получает подписанные ссылки", "HTTPS")
+
+Rel(eventsService, kafka, "Публикует и читает события", "Kafka protocol")
+Rel(identityService, kafka, "Публикует user events", "Kafka protocol")
+Rel(moviesService, kafka, "Публикует movie events", "Kafka protocol")
+Rel(paymentService, kafka, "Публикует payment events", "Kafka protocol")
+Rel(subscriptionService, kafka, "Обрабатывает payment events", "Kafka protocol")
+Rel(playbackService, kafka, "Публикует viewing events", "Kafka protocol")
+
+SHOW_LEGEND()
+@enduml

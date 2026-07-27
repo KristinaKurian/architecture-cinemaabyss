@@ -7,16 +7,13 @@ metadata:
     app.kubernetes.io/name: {{ include "cinemaabyss.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
 data:
-  # Database configuration
   DB_HOST: {{ .Values.database.host | quote }}
   DB_PORT: {{ .Values.database.port | quote }}
   DB_NAME: {{ .Values.database.name | quote }}
   DB_USER: {{ .Values.database.user | quote }}
-
-  # Service URLs
   MONOLITH_URL: "http://monolith:{{ .Values.monolith.service.port }}"
-  MOVIES_SERVICE_URL: "http://movies:{{ .Values.moviesService.service.port }}"
-  
-  # Strangler Fig configuration
+  MOVIES_SERVICE_URL: "http://movies-service:{{ .Values.moviesService.service.port }}"
+  EVENTS_SERVICE_URL: "http://events-service:{{ .Values.eventsService.service.port }}"
+  KAFKA_BROKERS: {{ .Values.config.kafkaBrokers | quote }}
   GRADUAL_MIGRATION: {{ .Values.config.gradualMigration | quote }}
   MOVIES_MIGRATION_PERCENT: {{ .Values.config.moviesMigrationPercent | quote }}

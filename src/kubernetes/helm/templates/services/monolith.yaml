@@ -43,13 +43,13 @@ spec:
           {{- toYaml .Values.monolith.resources | nindent 10 }}
         readinessProbe:
           httpGet:
-            path: /api/users
+            path: /health
             port: {{ .Values.monolith.service.targetPort }}
           initialDelaySeconds: 5
           periodSeconds: 10
         livenessProbe:
           httpGet:
-            path: /api/users
+            path: /health
             port: {{ .Values.monolith.service.targetPort }}
           initialDelaySeconds: 15
           periodSeconds: 20

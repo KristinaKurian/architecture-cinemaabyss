@@ -1,3 +1,80 @@
+# CinemaAbyss — выполненное решение
+
+> Исходное условие сохранено ниже. Реализованные файлы и результаты проверки перечислены в этом разделе.
+
+## Задание 1 — To-Be архитектура
+
+- [Контейнерная C4-диаграмма](docs/c4-container-to-be.puml)
+
+Диаграмма показывает единую точку входа, доменные сервисы, отдельные хранилища, Kafka, внешние системы и временный legacy-монолит.
+
+## Задание 2 — Proxy и Kafka
+
+### Proxy / Strangler Fig
+
+- [Исходный код](src/microservices/proxy/main.go)
+- [Unit-тесты](src/microservices/proxy/main_test.go)
+- [Dockerfile](src/microservices/proxy/Dockerfile)
+
+Proxy направляет users/payments/subscriptions в монолит, events — в events-service, а movie-трафик переключает между монолитом и movies-service с помощью `GRADUAL_MIGRATION` и `MOVIES_MIGRATION_PERCENT`.
+
+### Events / Kafka MVP
+
+- [HTTP API](src/microservices/events/main.go)
+- [Kafka producer/consumer](src/microservices/events/kafka.go)
+- [Unit-тесты](src/microservices/events/main_test.go)
+- [Dockerfile](src/microservices/events/Dockerfile)
+
+Реализованы события Movie/User/Payment, публикация в три топика и consumer-циклы с записью обработанных сообщений в лог.
+
+### Проверка
+
+```bash
+docker compose up -d --build
+cd tests/postman
+npm ci
+npm run test:local
+```
+
+Команды для проверки и получения требуемых скриншотов находятся в [docs/verification.md](docs/verification.md). Папка для фактических материалов: [docs/evidence](docs/evidence/README.md).
+
+## Задание 3 — CI/CD и Kubernetes
+
+- [Workflow сборки, тестов и публикации образов](.github/workflows/docker-build-push.yml)
+- [Workflow проверки pull request](.github/workflows/api-tests.yml)
+- [Events Deployment и Service](src/kubernetes/events-service.yaml)
+- [Proxy Deployment и Service](src/kubernetes/proxy-service.yaml)
+- [ConfigMap](src/kubernetes/configmap.yaml)
+- [Ingress](src/kubernetes/ingress.yaml)
+- [Инструкция по GHCR pull secret](src/kubernetes/README.md)
+
+Ingress направляет `/api/events` в events-service, а остальные запросы — в proxy-service.
+
+## Задание 4 — Helm
+
+- [values.yaml](src/kubernetes/helm/values.yaml)
+- [Proxy template](src/kubernetes/helm/templates/services/proxy-service.yaml)
+- [Events template](src/kubernetes/helm/templates/services/events-service.yaml)
+- [Ingress template](src/kubernetes/helm/templates/ingress.yaml)
+
+```bash
+helm lint src/kubernetes/helm
+helm upgrade --install cinemaabyss src/kubernetes/helm \
+  --namespace cinemaabyss \
+  --create-namespace
+```
+
+## Выполненная автоматическая проверка
+
+- `go test ./...` для proxy-service — успешно;
+- `go test ./...` для events-service — успешно;
+- `gofmt` для новых Go-сервисов — без изменений;
+- синтаксический разбор обычных YAML-файлов и GitHub workflows — успешно.
+
+Полный Docker Compose, Kubernetes/Minikube, Helm и UI-скриншоты требуют среды с Docker, `kubectl`, `helm` и Minikube. В текущем окружении этих инструментов нет, поэтому скриншоты не подменялись фиктивными изображениями.
+
+---
+
 ## Изучите [README.md](.\README.md) файл и структуру проекта.
 
 # Задание 1
