@@ -1,10 +1,11 @@
-const newman = require('newman');
 const fs = require('fs');
+const http = require('http');
+const https = require('https');
 const path = require('path');
+const { spawn } = require('child_process');
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 
-// Parse command line arguments
 const argv = yargs(hideBin(process.argv))
   .option('environment', {
     alias: 'e',
@@ -41,82 +42,144 @@ const argv = yargs(hideBin(process.argv))
     type: 'number',
     default: 10000
   })
+  .option('startup-timeout', {
+    description: 'Maximum time to wait for services in ms',
+    type: 'number',
+    default: 120000
+  })
+  .strict()
   .help()
   .alias('help', 'h')
-  .argv;
+  .parse();
 
-// Create reports directory if it doesn't exist
 const reportsDir = path.join(__dirname, 'reports');
-if (!fs.existsSync(reportsDir)) {
-  fs.mkdirSync(reportsDir, { recursive: true });
-}
+fs.mkdirSync(reportsDir, { recursive: true });
 
-// Configure Newman run
 const collectionPath = path.join(__dirname, `${argv.collection}.postman_collection.json`);
 const environmentPath = path.join(__dirname, `${argv.environment}.environment.json`);
 
-// Validate files exist
-if (!fs.existsSync(collectionPath)) {
-  console.error(`Collection file not found: ${collectionPath}`);
-  process.exit(1);
-}
-
-if (!fs.existsSync(environmentPath)) {
-  console.error(`Environment file not found: ${environmentPath}`);
-  process.exit(1);
-}
-
-// Parse reporters
-const reporters = argv.reporters.split(',').map(r => r.trim());
-
-// Configure Newman options
-const newmanOptions = {
-  collection: require(collectionPath),
-  environment: require(environmentPath),
-  reporters: reporters,
-  reporter: {
-    htmlextra: {
-      export: path.join(reportsDir, `report-${argv.environment}-${new Date().toISOString().replace(/:/g, '-')}.html`),
-      template: 'default',
-      showOnlyFails: false,
-      noSyntaxHighlighting: false,
-      testPaging: true,
-      browserTitle: "CinemaAbyss API Test Report",
-      title: "CinemaAbyss API Test Report",
-      titleSize: 1,
-      omitHeaders: false
-    },
-    junit: {
-      export: path.join(reportsDir, `junit-report-${argv.environment}-${new Date().toISOString().replace(/:/g, '-')}.xml`)
-    }
-  },
-  bail: argv.bail,
-  timeoutRequest: argv.timeout,
-  delayRequest: 100 // Small delay between requests
-};
-
-// Add folder option if specified
-if (argv.folder) {
-  newmanOptions.folder = argv.folder;
-}
-
-// Run Newman
-console.log(`Running tests against ${argv.environment} environment...`);
-newman.run(newmanOptions, function (err, summary) {
-  if (err) { 
-    console.error('Error running Newman:', err);
+for (const filePath of [collectionPath, environmentPath]) {
+  if (!fs.existsSync(filePath)) {
+    console.error(`Required file not found: ${filePath}`);
     process.exit(1);
   }
-  
-  // Log results
-  console.log('Newman run completed!');
-  
-  const failureCount = summary.run.failures.length;
-  console.log(`Total requests: ${summary.run.stats.requests.total}`);
-  console.log(`Failed requests: ${summary.run.stats.requests.failed}`);
-  console.log(`Total assertions: ${summary.run.stats.assertions.total}`);
-  console.log(`Failed assertions: ${summary.run.stats.assertions.failed}`);
-  
-  // Exit with appropriate code
-  process.exit(failureCount > 0 ? 1 : 0);
-});
+}
+
+function loadEnvironmentValues(filePath) {
+  const environment = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  return Object.fromEntries(
+    (environment.values || [])
+      .filter((item) => item.enabled !== false)
+      .map((item) => [item.key, item.value])
+  );
+}
+
+function requestHealth(urlString) {
+  return new Promise((resolve) => {
+    const parsed = new URL(urlString);
+    const client = parsed.protocol === 'https:' ? https : http;
+    const request = client.get(parsed, { timeout: 2000 }, (response) => {
+      response.resume();
+      resolve(response.statusCode >= 200 && response.statusCode < 300);
+    });
+    request.on('timeout', () => {
+      request.destroy();
+      resolve(false);
+    });
+    request.on('error', () => resolve(false));
+  });
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function waitForServices(values) {
+  const targets = {
+    'Monolith Service': [{ name: 'monolith', url: `${values.baseUrl}/health` }],
+    'Movies Microservice': [{ name: 'movies-service', url: `${values.moviesServiceUrl}/api/movies/health` }],
+    'Events Microservice': [{ name: 'events-service', url: `${values.eventsServiceUrl}/api/events/health` }],
+    'Proxy Service': [{ name: 'proxy-service', url: `${values.proxyServiceUrl}/health` }]
+  };
+
+  const selected = argv.folder ? targets[argv.folder] : Object.values(targets).flat();
+  if (!selected) {
+    throw new Error(`Unknown collection folder: ${argv.folder}`);
+  }
+
+  const deadline = Date.now() + argv.startupTimeout;
+  for (const target of selected) {
+    process.stdout.write(`Waiting for ${target.name} at ${target.url}`);
+    while (Date.now() < deadline) {
+      if (await requestHealth(target.url)) {
+        process.stdout.write(' - ready\n');
+        break;
+      }
+      process.stdout.write('.');
+      await sleep(2000);
+    }
+    if (Date.now() >= deadline && !(await requestHealth(target.url))) {
+      process.stdout.write('\n');
+      throw new Error(
+        `${target.name} did not become ready at ${target.url}. ` +
+        'Run "docker compose up -d --build" and check "docker compose ps".'
+      );
+    }
+  }
+}
+
+function resolveNewmanCli() {
+  try {
+    return require.resolve('newman/bin/newman.js');
+  } catch (error) {
+    throw new Error('Newman is not installed. Run "npm ci" in tests/postman before starting tests.');
+  }
+}
+
+function runNewman() {
+  const timestamp = new Date().toISOString().replace(/:/g, '-');
+  const reporters = argv.reporters.split(',').map((item) => item.trim()).filter(Boolean);
+  const args = [
+    resolveNewmanCli(),
+    'run',
+    collectionPath,
+    '--environment', environmentPath,
+    '--reporters', reporters.join(','),
+    '--timeout-request', String(argv.timeout),
+    '--delay-request', '100'
+  ];
+
+  if (reporters.includes('htmlextra')) {
+    args.push('--reporter-htmlextra-export', path.join(reportsDir, `report-${argv.environment}-${timestamp}.html`));
+  }
+  if (reporters.includes('junit')) {
+    args.push('--reporter-junit-export', path.join(reportsDir, `junit-report-${argv.environment}-${timestamp}.xml`));
+  }
+  if (argv.folder) {
+    args.push('--folder', argv.folder);
+  }
+  if (argv.bail) {
+    args.push('--bail');
+  }
+
+  console.log(`Running tests against ${argv.environment} environment...`);
+  const child = spawn(process.execPath, args, { stdio: 'inherit' });
+  child.on('error', (error) => {
+    console.error(`Unable to start Newman: ${error.message}`);
+    process.exit(1);
+  });
+  child.on('close', (code) => {
+    process.exit(code ?? 1);
+  });
+}
+
+(async () => {
+  try {
+    const environmentValues = loadEnvironmentValues(environmentPath);
+    await waitForServices(environmentValues);
+    runNewman();
+  } catch (error) {
+    console.error(error.message);
+    process.exit(1);
+  }
+})();

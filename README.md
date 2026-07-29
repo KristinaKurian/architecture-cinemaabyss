@@ -17,7 +17,7 @@
 
 | Компонент | Порт | Назначение |
 |---|---:|---|
-| Monolith | 8080 | Пользователи, платежи, подписки и legacy movie API |
+| Monolith | 18080 → 8080 | Пользователи, платежи, подписки и legacy movie API |
 | Movies Service | 8081 | Домен каталога фильмов |
 | Events Service | 8082 | Публикация и обработка событий Kafka |
 | Proxy Service | 8000 | Единая точка входа и Strangler Fig |
