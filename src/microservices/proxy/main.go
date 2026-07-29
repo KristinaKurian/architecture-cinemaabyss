@@ -119,6 +119,20 @@ func newReverseProxy(target *url.URL, upstreamName string) *httputil.ReverseProx
 }
 
 func (gateway *Gateway) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+	if request.URL.Path == "/" {
+		if request.Method != http.MethodGet {
+			writer.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+
+		writeJSON(writer, http.StatusOK, map[string]any{
+			"status":  true,
+			"service": "cinemaabyss",
+			"message": "CinemaAbyss API is running",
+		})
+		return
+	}
+
 	if request.URL.Path == "/health" {
 		if request.Method != http.MethodGet {
 			writer.WriteHeader(http.StatusMethodNotAllowed)
