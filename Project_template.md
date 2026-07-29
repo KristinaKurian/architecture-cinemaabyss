@@ -36,7 +36,9 @@ npm ci
 npm run test:local
 ```
 
-Команды для проверки и получения требуемых скриншотов находятся в [docs/verification.md](docs/verification.md). Папка для фактических материалов: [docs/evidence](docs/evidence/README.md).
+Скрины:
+[docs/evidence топик кафки](docs/evidence/topic.png)
+[docs/evidence запуск тестов](docs/evidence/test.png)
 
 ## Задание 3 — CI/CD и Kubernetes
 
@@ -49,7 +51,9 @@ npm run test:local
 - [Инструкция по GHCR pull secret](src/kubernetes/README.md)
 
 Ingress направляет `/api/events` в events-service, а остальные запросы — в proxy-service.
-
+[docs/evidence топик кафки](docs/evidence/task3.png)
+[docs/evidence API call](docs/evidence/API-call-task3.png)
+[docs/evidence event log](docs/evidence/event-task3.png)
 ## Задание 4 — Helm
 
 - [values.yaml](src/kubernetes/helm/values.yaml)
@@ -62,13 +66,3 @@ helm lint src/kubernetes/helm
 helm upgrade --install cinemaabyss src/kubernetes/helm --namespace cinemaabyss --create-namespace
 ```
 
-## Выполненная автоматическая проверка
-
-- `go test ./...` для proxy-service — успешно;
-- `go test ./...` для events-service — успешно;
-- `gofmt` для новых Go-сервисов — без изменений;
-- синтаксический разбор обычных YAML-файлов и GitHub workflows — успешно.
-
-Полный Docker Compose, Kubernetes/Minikube, Helm и UI-скриншоты требуют среды с Docker, `kubectl`, `helm` и Minikube. В текущем окружении этих инструментов нет, поэтому скриншоты не подменялись фиктивными изображениями.
-
----
