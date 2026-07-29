@@ -61,6 +61,15 @@ Ingress направляет `/api/events` в events-service, а остальн�
 - [Events template](src/kubernetes/helm/templates/services/events-service.yaml)
 - [Ingress template](src/kubernetes/helm/templates/ingress.yaml)
 
-[docs/evidence API](docs/evidence/task4-api.png)
-[docs/evidence test](docs/evidence/task4-test.png)
-[docs/evidence all](docs/evidence/task4-all.png)
+### Результаты проверки Helm
+
+Helm chart успешно установлен в namespace `cinemaabyss`.  
+Релиз `cinemaabyss` находится в статусе `deployed`, а все компоненты
+системы запущены и находятся в состоянии `Running`.
+
+![Установка Helm и состояние pod](docs/evidence/task4-test.png)
+
+После развёртывания через Helm выполнена проверка API через Ingress.
+Запрос `GET /api/movies` успешно вернул список фильмов.
+
+![Проверка API после установки Helm](docs/evidence/task4-api.png)
