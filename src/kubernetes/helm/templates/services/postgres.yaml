@@ -19,60 +19,62 @@ spec:
         app: postgres
     spec:
       containers:
-      - name: postgres
-        image: {{ .Values.database.image.repository }}:{{ .Values.database.image.tag }}
-        imagePullPolicy: {{ .Values.database.image.pullPolicy }}
-        ports:
-        - containerPort: 5432
-        env:
-        - name: POSTGRES_USER
-          valueFrom:
-            configMapKeyRef:
-              name: cinemaabyss-config
-              key: DB_USER
-        - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: cinemaabyss-secrets
-              key: DB_PASSWORD
-        - name: POSTGRES_DB
-          valueFrom:
-            configMapKeyRef:
-              name: cinemaabyss-config
-              key: DB_NAME
-        resources:
-          {{- toYaml .Values.database.resources | nindent 10 }}
-        volumeMounts:
-        - name: postgres-data
-          mountPath: /var/lib/postgresql/data
-        - name: postgres-init-scripts
-          mountPath: /docker-entrypoint-initdb.d
-        readinessProbe:
-          exec:
-            command: ["pg_isready", "-U", "postgres"]
-          initialDelaySeconds: 5
-          periodSeconds: 10
-        livenessProbe:
-          exec:
-            command: ["pg_isready", "-U", "postgres"]
-          initialDelaySeconds: 30
-          periodSeconds: 20
+        - name: postgres
+          image: {{ .Values.database.image.repository }}:{{ .Values.database.image.tag }}
+          imagePullPolicy: {{ .Values.database.image.pullPolicy }}
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: cinemaabyss-config
+                  key: DB_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cinemaabyss-secrets
+                  key: DB_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: cinemaabyss-config
+                  key: DB_NAME
+          resources:
+            {{- toYaml .Values.database.resources | nindent 12 }}
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+            - name: postgres-init-scripts
+              mountPath: /docker-entrypoint-initdb.d
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres"]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres"]
+            initialDelaySeconds: 30
+            periodSeconds: 20
       volumes:
-      - name: postgres-init-scripts
-        configMap:
-          name: postgres-init-scripts
+        - name: postgres-init-scripts
+          configMap:
+            name: postgres-init-scripts
+        {{- if not .Values.database.persistence.enabled }}
+        - name: postgres-data
+          emptyDir: {}
+        {{- end }}
   {{- if .Values.database.persistence.enabled }}
   volumeClaimTemplates:
-  - metadata:
-      name: postgres-data
-    spec:
-      accessModes: ["{{ .Values.database.persistence.accessMode }}"]
-      resources:
-        requests:
-          storage: {{ .Values.database.persistence.size }}
-  {{- else }}
-      - name: postgres-data
-        emptyDir: {}
+    - metadata:
+        name: postgres-data
+      spec:
+        accessModes:
+          - {{ .Values.database.persistence.accessMode | quote }}
+        resources:
+          requests:
+            storage: {{ .Values.database.persistence.size }}
   {{- end }}
 ---
 apiVersion: v1
@@ -88,6 +90,6 @@ spec:
   selector:
     app: postgres
   ports:
-  - port: {{ .Values.database.port }}
-    targetPort: 5432
+    - port: {{ .Values.database.port }}
+      targetPort: 5432
   type: ClusterIP

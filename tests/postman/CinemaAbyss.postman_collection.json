@@ -14,8 +14,12 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/health",
-              "host": ["{{baseUrl}}"],
-              "path": ["health"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
             }
           },
           "event": [
@@ -38,8 +42,13 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/users",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "users"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
             }
           },
           "event": [
@@ -73,12 +82,17 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/api/users",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "users"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"username\": \"testuser{{$randomInt}}\",\n    \"email\": \"testuser{{$randomInt}}@example.com\"\n}"
+              "raw": "{\n    \"username\": \"testuser-{{$guid}}\",\n    \"email\": \"testuser-{{$guid}}@example.com\"\n}"
             }
           },
           "event": [
@@ -107,8 +121,13 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/users?id={{userId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "users"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
               "query": [
                 {
                   "key": "id",
@@ -142,8 +161,13 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/movies",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "movies"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "movies"
+              ]
             }
           },
           "event": [
@@ -177,8 +201,13 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/api/movies",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "movies"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "movies"
+              ]
             },
             "body": {
               "mode": "raw",
@@ -211,8 +240,13 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/movies?id={{movieId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "movies"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "movies"
+              ],
               "query": [
                 {
                   "key": "id",
@@ -252,8 +286,13 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/api/payments",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "payments"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "payments"
+              ]
             },
             "body": {
               "mode": "raw",
@@ -286,8 +325,13 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/payments?id={{paymentId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "payments"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "payments"
+              ],
               "query": [
                 {
                   "key": "id",
@@ -327,8 +371,13 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/api/subscriptions",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "subscriptions"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "subscriptions"
+              ]
             },
             "body": {
               "mode": "raw",
@@ -361,8 +410,13 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/subscriptions?id={{subscriptionId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "subscriptions"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "subscriptions"
+              ],
               "query": [
                 {
                   "key": "id",
@@ -401,8 +455,14 @@
             "method": "GET",
             "url": {
               "raw": "{{moviesServiceUrl}}/api/movies/health",
-              "host": ["{{moviesServiceUrl}}"],
-              "path": ["api", "movies", "health"]
+              "host": [
+                "{{moviesServiceUrl}}"
+              ],
+              "path": [
+                "api",
+                "movies",
+                "health"
+              ]
             }
           },
           "event": [
@@ -430,8 +490,13 @@
             "method": "GET",
             "url": {
               "raw": "{{moviesServiceUrl}}/api/movies",
-              "host": ["{{moviesServiceUrl}}"],
-              "path": ["api", "movies"]
+              "host": [
+                "{{moviesServiceUrl}}"
+              ],
+              "path": [
+                "api",
+                "movies"
+              ]
             }
           },
           "event": [
@@ -465,8 +530,13 @@
             ],
             "url": {
               "raw": "{{moviesServiceUrl}}/api/movies",
-              "host": ["{{moviesServiceUrl}}"],
-              "path": ["api", "movies"]
+              "host": [
+                "{{moviesServiceUrl}}"
+              ],
+              "path": [
+                "api",
+                "movies"
+              ]
             },
             "body": {
               "mode": "raw",
@@ -499,8 +569,13 @@
             "method": "GET",
             "url": {
               "raw": "{{moviesServiceUrl}}/api/movies?id={{msMovieId}}",
-              "host": ["{{moviesServiceUrl}}"],
-              "path": ["api", "movies"],
+              "host": [
+                "{{moviesServiceUrl}}"
+              ],
+              "path": [
+                "api",
+                "movies"
+              ],
               "query": [
                 {
                   "key": "id",
@@ -539,8 +614,14 @@
             "method": "GET",
             "url": {
               "raw": "{{eventsServiceUrl}}/api/events/health",
-              "host": ["{{eventsServiceUrl}}"],
-              "path": ["api", "events", "health"]
+              "host": [
+                "{{eventsServiceUrl}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "health"
+              ]
             }
           },
           "event": [
@@ -574,12 +655,18 @@
             ],
             "url": {
               "raw": "{{eventsServiceUrl}}/api/events/movie",
-              "host": ["{{eventsServiceUrl}}"],
-              "path": ["api", "events", "movie"]
+              "host": [
+                "{{eventsServiceUrl}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "movie"
+              ]
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"movie_id\": {{movieId}},\n    \"title\": \"Test Movie Event\",\n    \"action\": \"viewed\",\n    \"user_id\": {{userId}}\n}"
+              "raw": "{\n    \"movie_id\": \"{{movieId}}\",\n    \"title\": \"Test Movie Event\",\n    \"action\": \"viewed\",\n    \"user_id\": \"{{userId}}\"\n}"
             }
           },
           "event": [
@@ -591,10 +678,19 @@
                   "    pm.response.to.have.status(201);",
                   "});",
                   "",
-                  "pm.test(\"Response has status success\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData.status).to.equal(\"success\");",
-                  "});"
+                  "pm.test(\"Response is JSON\", function () {",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.test(\"Response has status success\", function () {",
+                  "        pm.expect(jsonData.status).to.equal(\"success\");",
+                  "    });",
+                  "    pm.test(\"Response has event id\", function () {",
+                  "        pm.expect(jsonData.event_id).to.be.a(\"string\").and.not.empty;",
+                  "    });",
+                  "}"
                 ],
                 "type": "text/javascript"
               }
@@ -613,12 +709,18 @@
             ],
             "url": {
               "raw": "{{eventsServiceUrl}}/api/events/user",
-              "host": ["{{eventsServiceUrl}}"],
-              "path": ["api", "events", "user"]
+              "host": [
+                "{{eventsServiceUrl}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "user"
+              ]
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"user_id\": {{userId}},\n    \"username\": \"testuser\",\n    \"action\": \"logged_in\",\n    \"timestamp\": \"{{$isoTimestamp}}\"\n}"
+              "raw": "{\n    \"user_id\": \"{{userId}}\",\n    \"username\": \"testuser\",\n    \"action\": \"logged_in\",\n    \"timestamp\": \"{{$isoTimestamp}}\"\n}"
             }
           },
           "event": [
@@ -630,10 +732,19 @@
                   "    pm.response.to.have.status(201);",
                   "});",
                   "",
-                  "pm.test(\"Response has status success\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData.status).to.equal(\"success\");",
-                  "});"
+                  "pm.test(\"Response is JSON\", function () {",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.test(\"Response has status success\", function () {",
+                  "        pm.expect(jsonData.status).to.equal(\"success\");",
+                  "    });",
+                  "    pm.test(\"Response has event id\", function () {",
+                  "        pm.expect(jsonData.event_id).to.be.a(\"string\").and.not.empty;",
+                  "    });",
+                  "}"
                 ],
                 "type": "text/javascript"
               }
@@ -652,12 +763,18 @@
             ],
             "url": {
               "raw": "{{eventsServiceUrl}}/api/events/payment",
-              "host": ["{{eventsServiceUrl}}"],
-              "path": ["api", "events", "payment"]
+              "host": [
+                "{{eventsServiceUrl}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "payment"
+              ]
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"payment_id\": {{paymentId}},\n    \"user_id\": {{userId}},\n    \"amount\": 9.99,\n    \"status\": \"completed\",\n    \"timestamp\": \"{{$isoTimestamp}}\",\n    \"method_type\": \"credit_card\"\n}"
+              "raw": "{\n    \"payment_id\": \"{{paymentId}}\",\n    \"user_id\": \"{{userId}}\",\n    \"amount\": 9.99,\n    \"status\": \"completed\",\n    \"timestamp\": \"{{$isoTimestamp}}\",\n    \"method_type\": \"credit_card\"\n}"
             }
           },
           "event": [
@@ -669,10 +786,19 @@
                   "    pm.response.to.have.status(201);",
                   "});",
                   "",
-                  "pm.test(\"Response has status success\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData.status).to.equal(\"success\");",
-                  "});"
+                  "pm.test(\"Response is JSON\", function () {",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.test(\"Response has status success\", function () {",
+                  "        pm.expect(jsonData.status).to.equal(\"success\");",
+                  "    });",
+                  "    pm.test(\"Response has event id\", function () {",
+                  "        pm.expect(jsonData.event_id).to.be.a(\"string\").and.not.empty;",
+                  "    });",
+                  "}"
                 ],
                 "type": "text/javascript"
               }
@@ -690,8 +816,12 @@
             "method": "GET",
             "url": {
               "raw": "{{proxyServiceUrl}}/health",
-              "host": ["{{proxyServiceUrl}}"],
-              "path": ["health"]
+              "host": [
+                "{{proxyServiceUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
             }
           },
           "event": [
@@ -714,8 +844,13 @@
             "method": "GET",
             "url": {
               "raw": "{{proxyServiceUrl}}/api/movies",
-              "host": ["{{proxyServiceUrl}}"],
-              "path": ["api", "movies"]
+              "host": [
+                "{{proxyServiceUrl}}"
+              ],
+              "path": [
+                "api",
+                "movies"
+              ]
             }
           },
           "event": [
@@ -743,8 +878,13 @@
             "method": "GET",
             "url": {
               "raw": "{{proxyServiceUrl}}/api/users",
-              "host": ["{{proxyServiceUrl}}"],
-              "path": ["api", "users"]
+              "host": [
+                "{{proxyServiceUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
             }
           },
           "event": [
@@ -788,23 +928,40 @@
     },
     {
       "key": "userId",
-      "value": ""
+      "value": "1"
     },
     {
       "key": "movieId",
-      "value": ""
+      "value": "1"
     },
     {
       "key": "msMovieId",
-      "value": ""
+      "value": "1"
     },
     {
       "key": "paymentId",
-      "value": ""
+      "value": "1"
     },
     {
       "key": "subscriptionId",
-      "value": ""
+      "value": "1"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const idDefaults = { userId: 1, movieId: 1, msMovieId: 1, paymentId: 1, subscriptionId: 1 };",
+          "Object.entries(idDefaults).forEach(([key, value]) => {",
+          "    const current = pm.collectionVariables.get(key);",
+          "    if (current === undefined || current === null || String(current).trim() === \"\") {",
+          "        pm.collectionVariables.set(key, value);",
+          "    }",
+          "});"
+        ]
+      }
     }
   ]
 }

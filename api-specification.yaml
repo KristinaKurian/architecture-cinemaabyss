@@ -645,18 +645,18 @@ components:
           type: string
           description: Тип события
           example: "movie"
-        timestamp:
+        occurred_at:
           type: string
           format: date-time
-          description: Время события
-          example: "2023-01-15T14:30:00Z"
+          description: Время создания события сервисом
+          example: "2026-07-27T10:00:00Z"
         payload:
           type: object
           description: Полезная нагрузка события (зависит от типа события)
       required:
         - id
         - type
-        - timestamp
+        - occurred_at
         - payload
 
     MovieEvent:
@@ -717,11 +717,11 @@ components:
           type: string
           description: Действие пользователя
           example: "registered"
-        timestamp:
+        occurred_at:
           type: string
           format: date-time
-          description: Время события
-          example: "2023-01-15T14:30:00Z"
+          description: Время создания события сервисом
+          example: "2026-07-27T10:00:00Z"
       required:
         - user_id
         - action
@@ -770,21 +770,18 @@ components:
           type: string
           description: Статус операции
           example: "success"
-        partition:
-          type: integer
-          description: Партиция Kafka
-          example: 0
-        offset:
-          type: integer
-          description: Смещение в партиции Kafka
-          example: 42
-        event:
-          $ref: '#/components/schemas/Event'
+        event_id:
+          type: string
+          description: Уникальный идентификатор опубликованного события
+          example: "38db80f04c9543049222cfef45ccbb11"
+        topic:
+          type: string
+          description: Kafka topic, в который опубликовано событие
+          example: "movie-events"
       required:
         - status
-        - partition
-        - offset
-        - event
+        - event_id
+        - topic
 
     Error:
       type: object

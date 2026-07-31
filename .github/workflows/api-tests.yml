@@ -1,71 +1,63 @@
 name: API Tests
 
 on:
-  push:
-    branches: [ main, master ]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
   workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Environment to run tests against'
-        required: true
-        default: 'docker'
-        type: choice
-        options:
-          - local
-          - docker
-      test_folder:
-        description: 'Test folder to run (leave empty for all)'
-        required: false
-        type: string
 
 jobs:
   api-tests:
-    name: Run API Tests
     runs-on: ubuntu-latest
-    
+    permissions:
+      contents: read
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v7
 
-      - name: Set up Docker Compose
+      - name: Start services
+        run: docker compose up -d --build
+
+      - name: Wait until the proxy is ready
+        shell: bash
         run: |
-          docker compose --version
-      
-      - name: Start services with Docker Compose
-        run: |
-          docker compose up -d
-          # Wait for services to be ready
-          echo "Waiting for services to be ready..."
-          sleep 120
-      
+          set -euo pipefail
+          for attempt in {1..60}; do
+            if curl --fail --silent http://127.0.0.1:8000/health >/dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose ps
+          docker compose logs
+          exit 1
+
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v7
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: "22"
+          cache: npm
           cache-dependency-path: tests/postman/package-lock.json
-      
-      - name: Install Newman and dependencies
-        working-directory: tests/postman
-        run: npm install
-      
-      - name: Run API tests
-        working-directory: tests/postman
-        run: |
 
-          docker compose up -d
-          # Wait for services to be ready
-          echo "Waiting for services to be ready..."
-          sleep 15
-          # Build the Docker image
-          docker build -t cinemaabyss-api-tests .
-          
-          # Run the tests in Docker
-          docker run --network=cinemaabyss-network -v "$(pwd)/reports:/app/reports" cinemaabyss-api-tests
-        
-      
+      - name: Install test dependencies
+        working-directory: tests/postman
+        run: npm ci
+
+      - name: Run Postman tests
+        working-directory: tests/postman
+        run: npm run test:local
+
+      - name: Upload Newman reports
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: newman-reports
+          path: tests/postman/reports
+          if-no-files-found: ignore
+
+      - name: Print logs on failure
+        if: failure()
+        run: docker compose logs
+
       - name: Stop services
         if: always()
-        run: docker compose down
+        run: docker compose down -v

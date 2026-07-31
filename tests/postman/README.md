@@ -44,7 +44,7 @@ The tests cover the following services:
 cd tests/postman
 
 # Install dependencies
-npm install
+npm ci
 ```
 
 ## Running Tests
@@ -108,7 +108,7 @@ These tests can be integrated into CI/CD pipelines. Here's an example of how to 
 - name: Run API Tests
   run: |
     cd tests/postman
-    npm install
+    npm ci
     npm run test:docker
 ```
 
